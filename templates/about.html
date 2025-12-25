@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}Tentang Proyek - Fraud Detection SVM{% endblock %}
+
+{% block content %}
+<section class="about-section">
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">Tentang Proyek</h1>
+            <p class="page-subtitle">Memahami teknologi <strong>Machine Learning</strong> di balik deteksi penipuan transaksi digital</p>
+        </div>
+        
+        <div class="about-content">
+            <div class="about-card glass-card">
+                <div class="card-icon"></div>
+                <h2 class="card-title">Apa Itu Fraud Detection?</h2>
+                <p class="card-text">
+                    Fraud detection atau deteksi penipuan adalah proses identifikasi transaksi yang mencurigakan atau 
+                    tidak sah dalam sistem keuangan digital. Dengan meningkatnya transaksi digital, kebutuhan akan sistem 
+                    deteksi fraud yang akurat dan real-time menjadi sangat penting.
+                </p>
+                <p class="card-text">
+                    Sistem ini menggunakan teknologi Machine Learning untuk menganalisis pola transaksi dan mendeteksi 
+                    aktivitas yang tidak normal secara otomatis, membantu melindungi pengguna dari kerugian finansial.
+                </p>
+            </div>
+            
+            <div class="about-card glass-card">
+                <div class="card-icon"></div>
+                <h2 class="card-title">Pentingnya Deteksi Fraud</h2>
+                <div class="importance-list">
+                    <div class="importance-item">
+                        <span class="item-number">01</span>
+                        <div class="item-content">
+                            <h3>Melindungi Pengguna</h3>
+                            <p>Mencegah kerugian finansial akibat transaksi penipuan dan melindungi data pengguna</p>
+                        </div>
+                    </div>
+                    <div class="importance-item">
+                        <span class="item-number">02</span>
+                        <div class="item-content">
+                            <h3>Deteksi Real-Time</h3>
+                            <p>Mengidentifikasi transaksi mencurigakan secara instan sebelum kerugian terjadi</p>
+                        </div>
+                    </div>
+                    <div class="importance-item">
+                        <span class="item-number">03</span>
+                        <div class="item-content">
+                            <h3>Meningkatkan Kepercayaan</h3>
+                            <p>Membangun kepercayaan pengguna terhadap platform transaksi digital</p>
+                        </div>
+                    </div>
+                    <div class="importance-item">
+                        <span class="item-number">04</span>
+                        <div class="item-content">
+                            <h3>Efisiensi Operasional</h3>
+                            <p>Mengurangi beban manual review dengan automasi deteksi yang akurat</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="about-card glass-card">
+                <div class="card-icon"></div>
+                <h2 class="card-title">Cara Kerja Support Vector Machine (SVM)</h2>
+                <p class="card-text">
+                    <strong>Support Vector Machine (SVM)</strong> adalah algoritma machine learning yang digunakan untuk 
+                    klasifikasi dengan mencari hyperplane optimal yang memisahkan dua kelas (Normal vs Fraud) dengan margin maksimal.
+                </p>
+                
+                <div class="algorithm-steps">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Preprocessing Data</h4>
+                            <p>Data transaksi di-preprocess dengan StandardScaler untuk fitur numerik dan OneHotEncoder untuk fitur kategorikal</p>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>Feature Engineering</h4>
+                            <p>7 fitur transaksi (step, type, amount, dan balance) diubah menjadi representasi numerik yang siap untuk model</p>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>Training Model</h4>
+                            <p>Model LinearSVC dilatih dengan data yang sudah di-balance untuk mempelajari pola transaksi normal dan fraud</p>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h4>Hyperparameter Tuning</h4>
+                            <p>Parameter C di-tune menggunakan GridSearchCV untuk mendapatkan performa optimal</p>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">5</div>
+                        <div class="step-content">
+                            <h4>Prediksi</h4>
+                            <p>Model memprediksi apakah transaksi baru termasuk kategori Normal atau Fraud berdasarkan pola yang dipelajari</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="about-card glass-card">
+                <div class="card-icon"></div>
+                <h2 class="card-title">Dataset & Performa Model</h2>
+                <div class="dataset-info">
+                    <div class="info-row">
+                        <span class="info-label">Sumber Dataset:</span>
+                        <span class="info-value">Penipuan Transaksi Digital</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Total Data:</span>
+                        <span class="info-value">~6.3 juta transaksi</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Komposisi:</span>
+                        <span class="info-value">99.87% Normal, 0.13% Fraud (imbalanced)</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Data Training:</span>
+                        <span class="info-value">Balanced 1:1 (16,426 transaksi)</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Akurasi Model:</span>
+                        <span class="info-value highlight">~95%+</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Algoritma:</span>
+                        <span class="info-value">Linear Support Vector Classifier (LinearSVC)</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Preprocessing:</span>
+                        <span class="info-value">StandardScaler + OneHotEncoder</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="about-card glass-card">
+                <div class="card-icon">✨</div>
+                <h2 class="card-title">Kelebihan & Keterbatasan</h2>
+                
+                <div class="pros-cons-grid">
+                    <div class="pros-section">
+                        <h3 class="section-subtitle">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="10" stroke="#29d67d" stroke-width="2"/>
+                                <path d="M8 12L11 15L16 9" stroke="#29d67d" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                            Kelebihan
+                        </h3>
+                        <ul class="feature-list">
+                            <li>Akurasi tinggi (~95%) dalam klasifikasi</li>
+                            <li>Prediksi sangat cepat (real-time)</li>
+                            <li>Efektif untuk dataset besar</li>
+                            <li>Robust terhadap overfitting</li>
+                            <li>Dapat menangani data non-linear dengan kernel</li>
+                            <li>Memberikan decision score untuk interpretasi</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="cons-section">
+                        <h3 class="section-subtitle">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="10" stroke="#ff3b3b" stroke-width="2"/>
+                                <path d="M12 8V12M12 16H12.01" stroke="#ff3b3b" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                            Keterbatasan
+                        </h3>
+                        <ul class="feature-list">
+                            <li>Memerlukan data yang sudah di-balance untuk performa optimal</li>
+                            <li>Sensitif terhadap feature scaling</li>
+                            <li>Komputasi lebih berat untuk dataset sangat besar</li>
+                            <li>Hyperparameter tuning diperlukan untuk hasil terbaik</li>
+                            <li>Interpretasi model kurang intuitif dibanding tree-based</li>
+                            <li>Memerlukan update berkala untuk adaptasi pola fraud baru</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="about-card glass-card">
+                <div class="card-icon">🔬</div>
+                <h2 class="card-title">Teknologi yang Digunakan</h2>
+                <div class="tech-grid">
+                    <div class="tech-item">
+                        <div class="tech-icon">🐍</div>
+                        <div class="tech-name">Python</div>
+                        <div class="tech-desc">Backend & ML</div>
+                    </div>
+                    <div class="tech-item">
+                        <div class="tech-icon">🌶️</div>
+                        <div class="tech-name">Flask</div>
+                        <div class="tech-desc">Web Framework</div>
+                    </div>
+                    <div class="tech-item">
+                        <div class="tech-icon">🤖</div>
+                        <div class="tech-name">Scikit-learn</div>
+                        <div class="tech-desc">Machine Learning</div>
+                    </div>
+                    <div class="tech-item">
+                        <div class="tech-icon">📊</div>
+                        <div class="tech-name">Pandas</div>
+                        <div class="tech-desc">Data Processing</div>
+                    </div>
+                    <div class="tech-item">
+                        <div class="tech-icon">🎨</div>
+                        <div class="tech-name">CSS3</div>
+                        <div class="tech-desc">Styling & Animation</div>
+                    </div>
+                    <div class="tech-item">
+                        <div class="tech-icon">⚡</div>
+                        <div class="tech-name">JavaScript</div>
+                        <div class="tech-desc">Interactivity</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

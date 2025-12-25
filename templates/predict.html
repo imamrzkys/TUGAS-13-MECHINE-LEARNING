@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}Prediksi Berita - Naive Bayes{% endblock %}
+
+{% block content %}
+<section class="predict-section">
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">Prediksi Berita</h1>
+            <p class="page-subtitle">Masukkan teks berita untuk menganalisis keasliannya menggunakan <strong>Machine Learning</strong></p>
+        </div>
+        
+        <div class="predict-container">
+            <div class="predict-form-card glass-card">
+                <form method="POST" action="{{ url_for('predict') }}" id="predictForm">
+                    <div class="form-group">
+                        <label for="news_text" class="form-label">
+                            <span>TEKS BERITA</span>
+                            <span class="char-counter" id="charCounter">0 / 10,000</span>
+                        </label>
+                        <textarea 
+                            name="news_text" 
+                            id="news_text" 
+                            class="form-textarea"
+                            placeholder="Masukkan teks berita yang ingin Anda analisis... (minimal 50 karakter)"
+                            rows="10"
+                            maxlength="10000"
+                            required
+                        >{% if result %}{{ result.text }}{% endif %}</textarea>
+                        <div class="form-hint">Minimal 50 karakter, maksimal 10.000 karakter</div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary btn-glow" id="predictBtn">
+                            <span class="btn-text">PREDIKSI SEKARANG</span>
+                            <span class="btn-loader" style="display: none;">
+                                <svg class="spinner" width="20" height="20" viewBox="0 0 20 20">
+                                    <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="50" stroke-dashoffset="25"/>
+                                </svg>
+                            </span>
+                        </button>
+                        
+                        <button type="button" class="btn btn-secondary" id="autofillFake">
+                            Contoh Fake
+                        </button>
+                        
+                        <button type="button" class="btn btn-secondary" id="autofillReal">
+                            Contoh Real
+                        </button>
+                        
+                        <button type="button" class="btn btn-outline" id="clearBtn">
+                            Bersihkan
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            {% if result %}
+            <div class="result-card glass-card" id="resultCard">
+                <div class="result-header">
+                    <h2 class="result-title">Hasil Prediksi</h2>
+                </div>
+                
+                <div class="result-content">
+                    <div class="result-badge-container">
+                        <div class="result-badge {% if result.prediction == 'FAKE' %}badge-fake{% else %}badge-real{% endif %}">
+                            <span class="badge-icon">
+                                {% if result.prediction == 'FAKE' %}⚠️{% else %}✓{% endif %}
+                            </span>
+                            <span class="badge-text">{{ result.prediction_label }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="confidence-section">
+                        <div class="confidence-header">
+                            <span class="confidence-label">Tingkat Kepercayaan</span>
+                            <span class="confidence-value">{{ "%.2f"|format(result.confidence) }}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill {% if result.prediction == 'FAKE' %}progress-fake{% else %}progress-real{% endif %}" 
+                                 style="width: 0%"
+                                 data-width="{{ result.confidence }}">
+                            </div>
+                        </div>
+                        <div class="confidence-interpretation">
+                            <span class="interpretation-badge">{{ result.interpretation }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="probability-grid">
+                        <div class="probability-card prob-fake">
+                            <div class="prob-icon">⚠️</div>
+                            <div class="prob-label">Probabilitas Fake</div>
+                            <div class="prob-value">{{ "%.2f"|format(result.prob_fake) }}%</div>
+                            <div class="prob-bar">
+                                <div class="prob-fill" style="width: 0%" data-width="{{ result.prob_fake }}"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="probability-card prob-real">
+                            <div class="prob-icon">✓</div>
+                            <div class="prob-label">Probabilitas Real</div>
+                            <div class="prob-value">{{ "%.2f"|format(result.prob_real) }}%</div>
+                            <div class="prob-bar">
+                                <div class="prob-fill" style="width: 0%" data-width="{{ result.prob_real }}"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="result-info">
+                        <div class="info-icon">💡</div>
+                        <div class="info-text">
+                            {% if result.confidence >= 90 %}
+                                Model sangat yakin dengan prediksi ini. Tingkat kepercayaan di atas 90% menunjukkan pola yang sangat jelas dalam teks.
+                            {% elif result.confidence >= 60 %}
+                                Model cukup yakin dengan prediksi ini. Terdapat indikator yang cukup kuat untuk klasifikasi ini.
+                            {% else %}
+                                Model ragu-ragu dengan prediksi ini. Teks mungkin memiliki karakteristik campuran. Pertimbangkan untuk verifikasi lebih lanjut.
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+{% block extra_js %}
+<script>
+const fakeExample = "Breaking: Miracle cure works instantly for everyone! Share now before it gets deleted! Secret government cover-up revealed. Doctors hate this trick!";
+const realExample = "Menurut laporan resmi yang dirilis setelah proses evaluasi formal, lembaga tersebut mempublikasikan metodologi, sumber data, dan transkrip konferensi pers kepada publik.";
+
+document.getElementById('autofillFake').addEventListener('click', function() {
+    document.getElementById('news_text').value = fakeExample;
+    updateCharCounter();
+});
+
+document.getElementById('autofillReal').addEventListener('click', function() {
+    document.getElementById('news_text').value = realExample;
+    updateCharCounter();
+});
+
+document.getElementById('clearBtn').addEventListener('click', function() {
+    document.getElementById('news_text').value = '';
+    updateCharCounter();
+});
+
+const textarea = document.getElementById('news_text');
+const charCounter = document.getElementById('charCounter');
+
+function updateCharCounter() {
+    const length = textarea.value.length;
+    charCounter.textContent = `${length.toLocaleString()} / 10,000`;
+    
+    if (length < 50) {
+        charCounter.style.color = '#ff6b6b';
+    } else if (length > 9000) {
+        charCounter.style.color = '#ffa500';
+    } else {
+        charCounter.style.color = 'rgba(255, 255, 255, 0.6)';
+    }
+}
+
+textarea.addEventListener('input', updateCharCounter);
+updateCharCounter();
+
+document.getElementById('predictForm').addEventListener('submit', function() {
+    const btn = document.getElementById('predictBtn');
+    const btnText = btn.querySelector('.btn-text');
+    const btnLoader = btn.querySelector('.btn-loader');
+    
+    btnText.style.display = 'none';
+    btnLoader.style.display = 'inline-block';
+    btn.disabled = true;
+});
+
+{% if result %}
+setTimeout(function() {
+    const resultCard = document.getElementById('resultCard');
+    if (resultCard) {
+        resultCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        const progressFill = document.querySelector('.progress-fill');
+        const targetWidth = progressFill.getAttribute('data-width');
+        setTimeout(() => {
+            progressFill.style.width = targetWidth + '%';
+        }, 300);
+        
+        document.querySelectorAll('.prob-fill').forEach(fill => {
+            const targetWidth = fill.getAttribute('data-width');
+            setTimeout(() => {
+                fill.style.width = targetWidth + '%';
+            }, 500);
+        });
+    }
+}, 100);
+{% endif %}
+</script>
+{% endblock %}
+{% endblock %}

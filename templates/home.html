@@ -1,0 +1,510 @@
+{% extends "base.html" %}
+
+{% block title %}Beranda - Fraud Detection SVM{% endblock %}
+
+{% block content %}
+<section class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span>Powered by Machine Learning</span>
+            </div>
+            
+            <h1 class="hero-title">
+                Deteksi Penipuan Transaksi Digital dengan
+                <span class="gradient-text">Support Vector Machine</span>
+            </h1>
+            
+            <p class="hero-subtitle">
+                Sistem deteksi penipuan transaksi digital berbasis <strong>SVM (Support Vector Machine)</strong> dengan akurasi tinggi. 
+                Analisis real-time untuk membantu Anda membedakan transaksi normal dari transaksi fraud.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="predict-section">
+    <div class="container">
+        <div class="page-header">
+            <h2 class="section-title">Prediksi Transaksi</h2>
+            <p class="section-subtitle">Masukkan detail transaksi untuk menganalisis apakah transaksi tersebut fraud atau normal</p>
+        </div>
+        
+        <div class="predict-container">
+            <div class="predict-form-card glass-card">
+                <form method="POST" action="{{ url_for('predict') }}" id="predictForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="step" class="form-label">
+                                <span>STEP</span>
+                            </label>
+                            <input 
+                                type="number" 
+                                name="step" 
+                                id="step" 
+                                class="form-input"
+                                placeholder="Contoh: 1"
+                                min="0"
+                                value="{% if input_values %}{{ input_values.step }}{% endif %}"
+                                required
+                            />
+                            <div class="form-hint">Langkah dalam jam (integer >= 0)</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="type" class="form-label">
+                                <span>TIPE TRANSAKSI</span>
+                            </label>
+                            <select 
+                                name="type" 
+                                id="type" 
+                                class="form-input"
+                                required
+                            >
+                                <option value="">Pilih Tipe Transaksi</option>
+                                <option value="PAYMENT" {% if input_values and input_values.type == 'PAYMENT' %}selected{% endif %}>PAYMENT</option>
+                                <option value="TRANSFER" {% if input_values and input_values.type == 'TRANSFER' %}selected{% endif %}>TRANSFER</option>
+                                <option value="CASH_OUT" {% if input_values and input_values.type == 'CASH_OUT' %}selected{% endif %}>CASH_OUT</option>
+                                <option value="DEBIT" {% if input_values and input_values.type == 'DEBIT' %}selected{% endif %}>DEBIT</option>
+                                <option value="CASH_IN" {% if input_values and input_values.type == 'CASH_IN' %}selected{% endif %}>CASH_IN</option>
+                            </select>
+                            <div class="form-hint">Jenis transaksi</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="amount" class="form-label">
+                            <span>AMOUNT</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            name="amount" 
+                            id="amount" 
+                            class="form-input"
+                            placeholder="Contoh: 5000.00"
+                            step="0.01"
+                            min="0"
+                            value="{% if input_values %}{{ input_values.amount }}{% endif %}"
+                            required
+                        />
+                        <div class="form-hint">Jumlah transaksi (float >= 0)</div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="oldbalanceOrg" class="form-label">
+                                <span>OLD BALANCE ORIGIN</span>
+                            </label>
+                            <input 
+                                type="number" 
+                                name="oldbalanceOrg" 
+                                id="oldbalanceOrg" 
+                                class="form-input"
+                                placeholder="Contoh: 10000.00"
+                                step="0.01"
+                                min="0"
+                                value="{% if input_values %}{{ input_values.oldbalanceOrg }}{% endif %}"
+                                required
+                            />
+                            <div class="form-hint">Saldo awal pengirim</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="newbalanceOrig" class="form-label">
+                                <span>NEW BALANCE ORIGIN</span>
+                            </label>
+                            <input 
+                                type="number" 
+                                name="newbalanceOrig" 
+                                id="newbalanceOrig" 
+                                class="form-input"
+                                placeholder="Contoh: 5000.00"
+                                step="0.01"
+                                min="0"
+                                value="{% if input_values %}{{ input_values.newbalanceOrig }}{% endif %}"
+                                required
+                            />
+                            <div class="form-hint">Saldo baru pengirim</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="oldbalanceDest" class="form-label">
+                                <span>OLD BALANCE DESTINATION</span>
+                            </label>
+                            <input 
+                                type="number" 
+                                name="oldbalanceDest" 
+                                id="oldbalanceDest" 
+                                class="form-input"
+                                placeholder="Contoh: 0.00"
+                                step="0.01"
+                                min="0"
+                                value="{% if input_values %}{{ input_values.oldbalanceDest }}{% endif %}"
+                                required
+                            />
+                            <div class="form-hint">Saldo awal penerima</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="newbalanceDest" class="form-label">
+                                <span>NEW BALANCE DESTINATION</span>
+                            </label>
+                            <input 
+                                type="number" 
+                                name="newbalanceDest" 
+                                id="newbalanceDest" 
+                                class="form-input"
+                                placeholder="Contoh: 5000.00"
+                                step="0.01"
+                                min="0"
+                                value="{% if input_values %}{{ input_values.newbalanceDest }}{% endif %}"
+                                required
+                            />
+                            <div class="form-hint">Saldo baru penerima</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary btn-glow" id="predictBtn">
+                            <span class="btn-text">PREDIKSI SEKARANG</span>
+                            <span class="btn-loader" style="display: none;">
+                                <svg class="spinner" width="20" height="20" viewBox="0 0 20 20">
+                                    <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="50" stroke-dashoffset="25"/>
+                                </svg>
+                            </span>
+                        </button>
+                        
+                        <button type="reset" class="btn btn-secondary" id="resetBtn">
+                            Reset Form
+                        </button>
+                        
+                        <button type="button" class="btn btn-secondary" id="exampleNormal">
+                            Contoh NORMAL
+                        </button>
+                        
+                        <button type="button" class="btn btn-secondary" id="exampleFraud">
+                            Contoh FRAUD
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            {% if pred_label %}
+            <div class="result-card glass-card result-card-animate" id="resultCard">
+                <div class="result-header">
+                    <h2 class="result-title">Hasil Prediksi</h2>
+                </div>
+                
+                <div class="result-content">
+                    <div class="result-badge-container">
+                        <div class="result-badge {% if pred_label == 'FRAUD' %}badge-fraud{% else %}badge-normal{% endif %} badge-animate">
+                            <span class="badge-icon">
+                                {% if pred_label == 'FRAUD' %}⚠️{% else %}✓{% endif %}
+                            </span>
+                            <span class="badge-text">{{ pred_label }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="confidence-section">
+                        <div class="confidence-header">
+                            <span class="confidence-label">Tingkat Kepercayaan</span>
+                            <span class="confidence-value" id="confidenceValue">{{ confidence }}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill {% if pred_label == 'FRAUD' %}progress-fraud{% else %}progress-normal{% endif %}" 
+                                 style="width: 0%"
+                                 data-width="{{ confidence }}">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="probability-grid">
+                        <div class="probability-card prob-normal">
+                            <div class="prob-icon">✓</div>
+                            <div class="prob-label">Probabilitas NORMAL</div>
+                            <div class="prob-value" id="probNormal">{{ prob_normal }}%</div>
+                            <div class="prob-bar">
+                                <div class="prob-fill prob-normal-fill" style="width: 0%" data-width="{{ prob_normal }}"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="probability-card prob-fraud">
+                            <div class="prob-icon">⚠️</div>
+                            <div class="prob-label">Probabilitas FRAUD</div>
+                            <div class="prob-value" id="probFraud">{{ prob_fraud }}%</div>
+                            <div class="prob-bar">
+                                <div class="prob-fill prob-fraud-fill" style="width: 0%" data-width="{{ prob_fraud }}"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="result-info">
+                        <div class="info-icon">💡</div>
+                        <div class="info-text">{{ pred_text }}</div>
+                    </div>
+                    
+                    <div class="reasons-section">
+                        <h3 class="reasons-title">Alasan Prediksi:</h3>
+                        <ul class="reasons-list">
+                            {% for reason in reasons %}
+                            <li class="reason-item reason-animate" style="animation-delay: {{ loop.index0 * 0.1 }}s">
+                                <span class="reason-icon">{% if pred_label == 'FRAUD' %}🔴{% else %}🟢{% endif %}</span>
+                                <span class="reason-text">{{ reason }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
+                    <div class="decision-score-info">
+                        <div class="score-label">Decision Score:</div>
+                        <div class="score-value {% if pred_label == 'FRAUD' %}score-fraud{% else %}score-normal{% endif %}">
+                            {{ decision_score }}
+                        </div>
+                        <div class="score-explanation">
+                            {% if decision_score > 0 %}
+                                Score positif menunjukkan indikasi FRAUD
+                            {% else %}
+                                Score negatif menunjukkan indikasi NORMAL
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if error %}
+            <div class="error-alert glass-card">
+                <div class="error-content">
+                    <span class="error-icon">⚠️</span>
+                    <span class="error-text">Terjadi kesalahan. Silakan periksa input Anda dan coba lagi.</span>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+{% if plots %}
+<section class="visualizations-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Hasil Visualisasi</h2>
+            <p class="section-subtitle">Grafik dan analisis dari dataset dan model</p>
+        </div>
+        
+        <div class="visualizations-grid">
+            {% for plot in plots %}
+            <div class="visualization-card glass-card">
+                <div class="viz-image-container" onclick="openModal('{{ url_for('static', filename=plot.path) }}', '{{ plot.caption }}')">
+                    <img src="{{ url_for('static', filename=plot.path) }}" alt="{{ plot.caption }}" class="viz-image">
+                    <div class="viz-overlay">
+                        <svg class="zoom-icon" width="48" height="48" viewBox="0 0 48 48" fill="none">
+                            <circle cx="20" cy="20" r="10" stroke="white" stroke-width="2"/>
+                            <path d="M28 28L36 36" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M20 16V24M16 20H24" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <span class="zoom-text">Klik untuk memperbesar</span>
+                    </div>
+                </div>
+                <div class="viz-caption">
+                    <h3 class="viz-title">{{ plot.caption }}</h3>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<div id="imageModal" class="modal" onclick="closeModal()">
+    <span class="modal-close">&times;</span>
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <img id="modalImage" src="" alt="">
+        <div id="modalCaption" class="modal-caption"></div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+// Scroll ke form jika dari link predict
+{% if scroll_to_form %}
+setTimeout(function() {
+    const formCard = document.querySelector('.predict-form-card');
+    if (formCard) {
+        formCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}, 100);
+{% endif %}
+
+// Contoh transaksi NORMAL (akan terdeteksi sebagai NORMAL)
+const exampleNormal = {
+    step: 245,
+    type: 'PAYMENT',
+    amount: 15000.50,
+    oldbalanceOrg: 50000.00,
+    newbalanceOrig: 35000.00,
+    oldbalanceDest: 0.00,
+    newbalanceDest: 15000.50
+};
+
+// Contoh transaksi FRAUD (akan terdeteksi sebagai FRAUD)
+const exampleFraud = {
+    step: 1,
+    type: 'TRANSFER',
+    amount: 5000.00,
+    oldbalanceOrg: 10000.00,
+    newbalanceOrig: 5000.00,
+    oldbalanceDest: 0.00,
+    newbalanceDest: 0.00
+};
+
+// Auto-fill contoh NORMAL
+document.getElementById('exampleNormal').addEventListener('click', function() {
+    document.getElementById('step').value = exampleNormal.step;
+    document.getElementById('type').value = exampleNormal.type;
+    document.getElementById('amount').value = exampleNormal.amount;
+    document.getElementById('oldbalanceOrg').value = exampleNormal.oldbalanceOrg;
+    document.getElementById('newbalanceOrig').value = exampleNormal.newbalanceOrig;
+    document.getElementById('oldbalanceDest').value = exampleNormal.oldbalanceDest;
+    document.getElementById('newbalanceDest').value = exampleNormal.newbalanceDest;
+});
+
+// Auto-fill contoh FRAUD
+document.getElementById('exampleFraud').addEventListener('click', function() {
+    document.getElementById('step').value = exampleFraud.step;
+    document.getElementById('type').value = exampleFraud.type;
+    document.getElementById('amount').value = exampleFraud.amount;
+    document.getElementById('oldbalanceOrg').value = exampleFraud.oldbalanceOrg;
+    document.getElementById('newbalanceOrig').value = exampleFraud.newbalanceOrig;
+    document.getElementById('oldbalanceDest').value = exampleFraud.oldbalanceDest;
+    document.getElementById('newbalanceDest').value = exampleFraud.newbalanceDest;
+});
+
+document.getElementById('predictForm').addEventListener('submit', function() {
+    const btn = document.getElementById('predictBtn');
+    const btnText = btn.querySelector('.btn-text');
+    const btnLoader = btn.querySelector('.btn-loader');
+    
+    btnText.style.display = 'none';
+    btnLoader.style.display = 'inline-block';
+    btn.disabled = true;
+});
+
+{% if pred_label %}
+// Animasi untuk hasil prediksi
+setTimeout(function() {
+    const resultCard = document.getElementById('resultCard');
+    if (resultCard) {
+        resultCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Animate progress bar
+        setTimeout(() => {
+            const progressFill = document.querySelector('.progress-fill');
+            if (progressFill) {
+                const targetWidth = progressFill.getAttribute('data-width');
+                progressFill.style.width = targetWidth + '%';
+            }
+        }, 500);
+        
+        // Animate probability bars
+        setTimeout(() => {
+            document.querySelectorAll('.prob-fill').forEach(fill => {
+                const targetWidth = fill.getAttribute('data-width');
+                fill.style.width = targetWidth + '%';
+            });
+        }, 800);
+        
+        // Animate confidence counter
+        const confidenceValue = document.getElementById('confidenceValue');
+        if (confidenceValue) {
+            const targetValue = parseFloat(confidenceValue.textContent);
+            let currentValue = 0;
+            const increment = targetValue / 30;
+            const counter = setInterval(() => {
+                currentValue += increment;
+                if (currentValue >= targetValue) {
+                    currentValue = targetValue;
+                    clearInterval(counter);
+                }
+                confidenceValue.textContent = currentValue.toFixed(2) + '%';
+            }, 30);
+        }
+        
+        // Animate probability counters
+        const probNormal = document.getElementById('probNormal');
+        const probFraud = document.getElementById('probFraud');
+        
+        if (probNormal) {
+            const targetNormal = parseFloat(probNormal.textContent);
+            let currentNormal = 0;
+            const incrementNormal = targetNormal / 30;
+            const counterNormal = setInterval(() => {
+                currentNormal += incrementNormal;
+                if (currentNormal >= targetNormal) {
+                    currentNormal = targetNormal;
+                    clearInterval(counterNormal);
+                }
+                probNormal.textContent = currentNormal.toFixed(2) + '%';
+            }, 30);
+        }
+        
+        if (probFraud) {
+            const targetFraud = parseFloat(probFraud.textContent);
+            let currentFraud = 0;
+            const incrementFraud = targetFraud / 30;
+            const counterFraud = setInterval(() => {
+                currentFraud += incrementFraud;
+                if (currentFraud >= targetFraud) {
+                    currentFraud = targetFraud;
+                    clearInterval(counterFraud);
+                }
+                probFraud.textContent = currentFraud.toFixed(2) + '%';
+            }, 30);
+        }
+    }
+}, 300);
+{% endif %}
+
+function openModal(imageSrc, caption) {
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImage');
+    const modalCaption = document.getElementById('modalCaption');
+    
+    modal.style.display = 'flex';
+    modalImg.src = imageSrc;
+    modalCaption.textContent = caption;
+    
+    setTimeout(() => {
+        modal.classList.add('active');
+    }, 10);
+    
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+    const modal = document.getElementById('imageModal');
+    modal.classList.remove('active');
+    
+    setTimeout(() => {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }, 300);
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeModal();
+    }
+});
+
+const vizCards = document.querySelectorAll('.visualization-card');
+vizCards.forEach((card, index) => {
+    setTimeout(() => {
+        card.classList.add('fade-in');
+    }, index * 100);
+});
+</script>
+{% endblock %}
+{% endblock %}
